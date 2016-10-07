@@ -43,18 +43,18 @@ int main(void){
     while (1) {
         printf("어디로 가시겠습니까? x y : ");
         scanf("%d %d", &curX, &curY);
-        printf("%d\n\n", room[curX][curY]);     
+        printf("%d\n\n", room[curX-1][curY-1]);     
         if (room[curX][curY] >= 100) {
             printf("선택하신 곳은 장애물이 있습니다. 다시 선택해주십시오.");
         }
         else{
-            destination[0] = curX;
-            destination[1] = curY;
+            destination[0] = curX-1;
+            destination[1] = curY-1;
             break;
         }
     }
 
-   findPathRoute(0, 0, 0);
+   findPathRoute(0, 0, 1);
    for(curX = 0; curX < room[destination[0]][destination[1]]; curX++){
        printf("(x : %d, y : %d)\n", stackPath[curX][0], stackPath[curX][1]);
     }   
@@ -161,31 +161,34 @@ void findPathRoute(int srcI, int srcJ, int curPos){
         return;
     }
 
-    for(i = 0; i < room[destination[0]][destination[1]]; i++){
+    /*for(i = 0; i < room[destination[0]][destination[1]]; i++){
        printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
-    }
+    }*/
 
 
-    while(curPos > 0){
+    if(curPos > 0){
         //up
         if(srcI - 1 > 0 && room[srcI-1][srcJ] < OBSTACLE && room[srcI-1][srcJ] != 0){
             findPathRoute(srcI-1,srcJ,curPos+1);
+        }else{
+            resetStack(curPos);
         }
         //left
         if(srcJ - 1 > 0 && room[srcI][srcJ-1] < OBSTACLE && room[srcI][srcJ-1] != 0){
             findPathRoute(srcI,srcJ-1,curPos+1);
-        }
+        }else
+            resetStack(curPos);
         //right
         if(srcJ + 1 < EXVALUE && room[srcI][srcJ+1] < OBSTACLE && room[srcI][srcJ+1] != 0){
             findPathRoute(srcI,srcJ+1,curPos+1);
-        }
+        }else
+            resetStack(curPos);
         //down
         if(srcI + 1 < EXVALUE && room[srcI+1][srcJ] < OBSTACLE && room[srcI+1][srcJ] != 0){
             findPathRoute(srcI+1,srcJ,curPos+1);
         }
-        
-        for(k = 0; k < 3; k++)
-            stackPath[curPos][k] = 0;
+        else
+            resetStack(curPos);
         
     }
 }
@@ -208,4 +211,14 @@ void inStack(int srcI, int srcJ, int curPos){
     stackPath[curPos][0] = srcI;
     stackPath[curPos][1] = srcJ;
     stackPath[curPos][2] = room[srcI][srcJ];
+}
+
+void resetStack(int src){
+    int k, m;
+   
+    for(m = 9; src + m < room[destination[0]][destination[1]]; m++){
+        for(k = 0; k < 3; k++){
+            stackPath[src + m][k] = 0;
+         }
+     }
 }
