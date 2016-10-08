@@ -76,19 +76,16 @@ void init(int srcX, int srcY){ // srcX, srcY = 시작점
 
     for(i = 0; i < EXVALUE; i++){
         for(j = 0; j < EXVALUE; j++){
-            if(path[srcX + i][srcY + j] < OBSTACLE){
+            if(path[srcX + i][srcY + j] < OBSTACLE)
                 room[srcX + i][srcY + j] = 0;
-                path[srcX + i][srcY + j] = 0;
-            }
-            else{
+            else
                 room[srcX + i][srcY + j] = OBSTACLE;
-            }
          }
         for(j = 0; j < 3; j++){
             queue[i][j] = 0;
         }
     }
-
+    room[srcX][srcY] = 1; // 초기값
     countQ = 0;
 }
 
@@ -110,6 +107,7 @@ void printRoom(void){
 void setThePath(){
     int i;
     int maxLegth;
+
     maxLegth = room[destination[0]][destination[1]];
     for(i = 0; i < maxLegth; i++){
        queue[i][0] = stackPath[maxLegth-i][0];
@@ -146,9 +144,7 @@ void findPathValue(int srcI, int srcJ){
     int curPos = 0;
 
     init(0,0);
-    room[srcI][srcJ] = 1;
     inQueue(srcI, srcJ, 1);
-    
     
     while(curPos < countQ && (i != EXVALUE || j != EXVALUE)){
         i = queue[curPos][0];
@@ -156,12 +152,12 @@ void findPathValue(int srcI, int srcJ){
         l = queue[curPos][2];
         
         //right
-        if(i < EXVALUE && room[i][j+1] == 0){
+        if(i < EXVALUE - 1 && room[i][j+1] == 0){
             inQueue(i, j+1, l+1);
             room[i][j+1] = l+1;
         }
         //down
-        if(i < EXVALUE && room[i+1][j] == 0){
+        if(i < EXVALUE - 1 && room[i+1][j] == 0){
             inQueue(i+1,j,l+1);
             room[i+1][j] = l+1;
         }
@@ -181,18 +177,19 @@ void findPathValue(int srcI, int srcJ){
         //sleep(1);
     }   
     printRoom();
+    scanf("%d", &l);
 }
 
 //curPos 받을 때 최대 값으로
 void findPathRoute(int srcI, int srcJ, int curPos){
     int i, j, l, k;
+
     inStack(srcI, srcJ, curPos);
 
-/*
     if((srcI == 0 && srcJ == 0) || curPos == 0){
         return;
     }
-*/
+
     /*for(i = 0; i < room[destination[0]][destination[1]]; i++){
        printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
     }*/
@@ -200,19 +197,19 @@ void findPathRoute(int srcI, int srcJ, int curPos){
 
     if(curPos > 0){
         //up
-        if((srcI - 1 > 0) && (room[srcI-1][srcJ] < OBSTACLE) && (room[srcI-1][srcJ] != 0) && (stackPath[curPos][2] - 1 == room[srcI-1][srcJ])){
+        if(srcI - 1 > 0 && room[srcI-1][srcJ] < OBSTACLE && room[srcI-1][srcJ] != 0 && stackPath[curPos][2] - 1 == room[srcI-1][srcJ]){
             findPathRoute(srcI-1,srcJ,curPos-1);
         }
         //left
-        if((srcJ - 1 > 0) && (room[srcI][srcJ-1] < OBSTACLE) &&( room[srcI][srcJ-1] != 0 )&& (stackPath[curPos][2] -1 == room[srcI][srcJ-1])){
+        if(srcJ - 1 > 0 && room[srcI][srcJ-1] < OBSTACLE && room[srcI][srcJ-1] != 0 && stackPath[curPos][2] -1 == room[srcI][srcJ-1]){
             findPathRoute(srcI,srcJ-1,curPos-1);
         }
         //right
-        if((srcJ + 1 < EXVALUE) && (room[srcI][srcJ+1] < OBSTACLE) &&( room[srcI][srcJ+1] != 0) && (stackPath[curPos][2] -1 == room[srcI][srcJ+1])){
+        if(srcJ + 1 < EXVALUE && room[srcI][srcJ+1] < OBSTACLE && room[srcI][srcJ+1] != 0 && stackPath[curPos][2] -1 == room[srcI][srcJ+1]){
             findPathRoute(srcI,srcJ+1,curPos-1);
         }
         //down
-        if((srcI + 1 < EXVALUE) && (room[srcI+1][srcJ] < OBSTACLE) && (room[srcI+1][srcJ] != 0) &&( stackPath[curPos][2] - 1 == room[srcI+1][srcJ])){
+        if(srcI + 1 < EXVALUE && room[srcI+1][srcJ] < OBSTACLE && room[srcI+1][srcJ] != 0 && stackPath[curPos][2] - 1 == room[srcI+1][srcJ]){
             findPathRoute(srcI+1,srcJ,curPos-1);
         }
        
@@ -221,13 +218,11 @@ void findPathRoute(int srcI, int srcJ, int curPos){
 
 void Move(int srcI, int srcJ, int count){
     int i, j;
-   
-    init(0,0); 
+
     findPathValue(srcI, srcJ);
-    findPathRoute(srcI, srcJ, room[destination[0]][destination[1]]);
+    findPathRoute(srcI, srcJ, count);
     setThePath();
     
-    scanf("%d",&i);
     while(count<room[destination[0]][destination[1]]){
         system("clear");
         printRoom();
@@ -239,7 +234,8 @@ void Move(int srcI, int srcJ, int count){
         if(hiddenObstacle[i][j] == OBSTACLE){
             room[i][j] = OBSTACLE;
             path[i][j] = OBSTACLE;
-            Move(stackPath[count-1][0], stackPath[count-1][1], 1);
+            resetStack(count);
+            Move(stackPath[count-1][0], stackPath[count-1][1], count-1);
         }
         else{
             path[i][j] = -1;
