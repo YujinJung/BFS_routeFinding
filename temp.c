@@ -6,6 +6,9 @@
 #define OBSTACLE 100
 #define EXVALUE 21
 
+#define MAX(a,b) a>b?a:b
+#define MIN(a,b) a<b?a:b
+
 int room[EXVALUE+1][EXVALUE+1] = {0,};
 int path[EXVALUE+1][EXVALUE+1] = {0,};
 int destination[2] = {0,};
@@ -111,6 +114,10 @@ void setThePath(){
     int i;
     int maxLegth;
     maxLegth = room[destination[0]][destination[1]];
+
+for(i = 0; i < room[destination[0]][destination[1]]; i++){
+       printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
+}
     for(i = 0; i < maxLegth; i++){
        queue[i][0] = stackPath[maxLegth-i][0];
        queue[i][1] = stackPath[maxLegth-i][1];
@@ -176,9 +183,9 @@ void findPathValue(int srcI, int srcJ){
             room[i-1][j] = l+1;
         }
         curPos++; 
-        //system("clear");
-        //printRoom();
-        //sleep(1);
+        system("clear");
+      printRoom();
+        sleep(1);
     }   
     printRoom();
 }
@@ -187,7 +194,6 @@ void findPathValue(int srcI, int srcJ){
 void findPathRoute(int srcI, int srcJ, int curPos){
     int i, j, l, k;
     inStack(srcI, srcJ, curPos);
-
 /*
     if((srcI == 0 && srcJ == 0) || curPos == 0){
         return;
@@ -198,24 +204,36 @@ void findPathRoute(int srcI, int srcJ, int curPos){
     }*/
 
 
-    if(curPos > 0){
+    if(curPos > 0)
+        /*
         //up
-        if((srcI - 1 > 0) && (room[srcI-1][srcJ] < OBSTACLE) && (room[srcI-1][srcJ] != 0) && (stackPath[curPos][2] - 1 == room[srcI-1][srcJ])){
+        if((srcI - 1 >= 0) && (room[srcI-1][srcJ] < OBSTACLE) && (room[srcI-1][srcJ] != 0) && (stackPath[curPos][2] - 1 == room[srcI-1][srcJ])){
+            if(room[srcI-1][srcJ] < OBSTACLE)
             findPathRoute(srcI-1,srcJ,curPos-1);
+            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
+
         }
         //left
-        if((srcJ - 1 > 0) && (room[srcI][srcJ-1] < OBSTACLE) &&( room[srcI][srcJ-1] != 0 )&& (stackPath[curPos][2] -1 == room[srcI][srcJ-1])){
+        if((srcJ - 1 >= 0) && (room[srcI][srcJ-1] < OBSTACLE) &&( room[srcI][srcJ-1] != 0 )&& (stackPath[curPos][2] -1 == room[srcI][srcJ-1])){
+            if(room[srcI][srcJ-1] < OBSTACLE)
             findPathRoute(srcI,srcJ-1,curPos-1);
+            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
         }
         //right
         if((srcJ + 1 < EXVALUE) && (room[srcI][srcJ+1] < OBSTACLE) &&( room[srcI][srcJ+1] != 0) && (stackPath[curPos][2] -1 == room[srcI][srcJ+1])){
+            if(room[srcI][srcJ+1] < OBSTACLE)
             findPathRoute(srcI,srcJ+1,curPos-1);
+            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
         }
         //down
         if((srcI + 1 < EXVALUE) && (room[srcI+1][srcJ] < OBSTACLE) && (room[srcI+1][srcJ] != 0) &&( stackPath[curPos][2] - 1 == room[srcI+1][srcJ])){
+            if(room[srcI+1][srcJ] < OBSTACLE)
             findPathRoute(srcI+1,srcJ,curPos-1);
+            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
         }
-       
+       */
+        // 가장 작은 값
+        i = MIN(Min(room[srcI-1][srcJ],room[srcI][srcJ-1]),MIN(room[srcI+1][srcJ],room[srcI][srcJ+1])) 
     }
 }
 
@@ -223,10 +241,15 @@ void Move(int srcI, int srcJ, int count){
     int i, j;
    
     init(0,0); 
+    resetStack(0);
     findPathValue(srcI, srcJ);
     findPathRoute(srcI, srcJ, room[destination[0]][destination[1]]);
+    for(i = 0; i < room[destination[0]][destination[1]]; i++){
+       printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
+}
+
     setThePath();
-    
+     
     scanf("%d",&i);
     while(count<room[destination[0]][destination[1]]){
         system("clear");
@@ -239,6 +262,11 @@ void Move(int srcI, int srcJ, int count){
         if(hiddenObstacle[i][j] == OBSTACLE){
             room[i][j] = OBSTACLE;
             path[i][j] = OBSTACLE;
+            path[stackPath[count-1][0]][stackPath[count-1][1]] = -1;
+            room[stackPath[count-1][0]][stackPath[count-1][1]] = 1;
+            printf("장애물 ;%d %d", stackPath[count-1][0], stackPath[count-1][1]);
+            scanf("%d",&i);
+
             Move(stackPath[count-1][0], stackPath[count-1][1], 1);
         }
         else{
