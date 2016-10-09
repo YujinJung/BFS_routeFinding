@@ -19,6 +19,7 @@ int queue[1000][3] = {0,}; //경로값용 큐
 int stackPath[1000][3] = {0,}; //경로이동용 스택
 
 int countQ = 0;
+int countG = 0;
 
 void init(int, int);
 void printRoom(void);
@@ -40,7 +41,7 @@ int main(void){
        = path[8][3] = path[3][8] = path[6][5] = path[9][2] = path[9][7] = path[6][10] = path[5][9] = 100;
 
     hiddenObstacle[6][4] = OBSTACLE;
-    hiddenObstacle[7][5] = 1;
+    hiddenObstacle[11][4] = OBSTACLE;
     init(0,0);
     printRoom();
     findPathValue(0,0);
@@ -83,8 +84,10 @@ void init(int srcX, int srcY){ // srcX, srcY = 시작점
                 room[srcX + i][srcY + j] = 0;
                 path[srcX + i][srcY + j] = 0;
             }
-            else{
+            else if(path[srcX + i][srcY + j] < 500)
                 room[srcX + i][srcY + j] = OBSTACLE;
+            else{
+                room[srcX + i][srcY + j] = OBSTACLE + 600;
             }
          }
         for(j = 0; j < 3; j++){
@@ -118,13 +121,13 @@ void setThePath(){
 for(i = 0; i < room[destination[0]][destination[1]]; i++){
        printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
 }
-    for(i = 0; i < maxLegth; i++){
+/*    for(i = 0; i < maxLegth; i++){
        queue[i][0] = stackPath[maxLegth-i][0];
        queue[i][1] = stackPath[maxLegth-i][1];
        queue[i][2] = stackPath[maxLegth-i][2];
-    }
+    }*/
     for(i = 0; i < maxLegth; i++){
-       path[queue[i][0]][queue[i][1]] = 1;
+       path[stackPath[i][0]][stackPath[i][1]] = 1;
     }
 
 }
@@ -136,10 +139,12 @@ void printPath() {
         for (j = 0; j < EXVALUE; j++) {
             if(path[i][j] == 1)
                 printf(" $ ");
-            else if(path[i][j] > 99)
-                printf(" o ");
+            else if(path[i][j] > 599)
+                printf(" X ");
             else if(path[i][j] < 0)
                 printf(" M ");
+            else if(path[i][j] > 99)
+                printf(" o ");
             else
                 printf("   ");
         }
@@ -183,17 +188,19 @@ void findPathValue(int srcI, int srcJ){
             room[i-1][j] = l+1;
         }
         curPos++; 
-        system("clear");
-      printRoom();
-        sleep(1);
+//        system("clear");
+//      printRoom();
+//        sleep(1);
     }   
     printRoom();
 }
 
 //curPos 받을 때 최대 값으로
-void findPathRoute(int srcI, int srcJ, int curPos){
+void findPathRoute(int moveI, int moveJ, int curPos){
     int i, j, l, k;
-    inStack(srcI, srcJ, curPos);
+
+    
+    inStack(moveI, moveJ, curPos);
 /*
     if((srcI == 0 && srcJ == 0) || curPos == 0){
         return;
@@ -203,37 +210,32 @@ void findPathRoute(int srcI, int srcJ, int curPos){
        printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
     }*/
 
-
-    if(curPos > 0)
-        /*
+    
+    if(curPos > 0){
+      
         //up
-        if((srcI - 1 >= 0) && (room[srcI-1][srcJ] < OBSTACLE) && (room[srcI-1][srcJ] != 0) && (stackPath[curPos][2] - 1 == room[srcI-1][srcJ])){
-            if(room[srcI-1][srcJ] < OBSTACLE)
-            findPathRoute(srcI-1,srcJ,curPos-1);
-            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
-
+        if((moveI - 1 >= 0) && (room[moveI-1][moveJ] != 0) && (stackPath[curPos][2] - 1 == room[moveI-1][moveJ])){
+            if(room[moveI-1][moveJ] < OBSTACLE)
+                findPathRoute(moveI-1,moveJ,curPos-1);
         }
         //left
-        if((srcJ - 1 >= 0) && (room[srcI][srcJ-1] < OBSTACLE) &&( room[srcI][srcJ-1] != 0 )&& (stackPath[curPos][2] -1 == room[srcI][srcJ-1])){
-            if(room[srcI][srcJ-1] < OBSTACLE)
-            findPathRoute(srcI,srcJ-1,curPos-1);
-            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
+        if((moveJ - 1 >= 0) &&( room[moveI][moveJ-1] != 0 )&& (stackPath[curPos][2] -1 == room[moveI][moveJ-1])){
+            if(room[moveI][moveJ-1] < OBSTACLE)
+                findPathRoute(moveI,moveJ-1,curPos-1);
         }
         //right
-        if((srcJ + 1 < EXVALUE) && (room[srcI][srcJ+1] < OBSTACLE) &&( room[srcI][srcJ+1] != 0) && (stackPath[curPos][2] -1 == room[srcI][srcJ+1])){
-            if(room[srcI][srcJ+1] < OBSTACLE)
-            findPathRoute(srcI,srcJ+1,curPos-1);
-            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
+        if((moveJ + 1 < EXVALUE) &&( room[moveI][moveJ+1] != 0) && (stackPath[curPos][2] -1 == room[moveI][moveJ+1])){
+            if(room[moveI][moveJ+1] < OBSTACLE)
+                findPathRoute(moveI,moveJ+1,curPos-1);
         }
         //down
-        if((srcI + 1 < EXVALUE) && (room[srcI+1][srcJ] < OBSTACLE) && (room[srcI+1][srcJ] != 0) &&( stackPath[curPos][2] - 1 == room[srcI+1][srcJ])){
-            if(room[srcI+1][srcJ] < OBSTACLE)
-            findPathRoute(srcI+1,srcJ,curPos-1);
-            printf("#######(x : %d, y : %d)\n", stackPath[curPos][0], stackPath[curPos][1]);
+        if((moveI + 1 < EXVALUE) && (room[moveI+1][moveJ] != 0) &&( stackPath[curPos][2] - 1 == room[moveI+1][moveJ])){
+            if(room[moveI+1][moveJ] < OBSTACLE)
+                findPathRoute(moveI+1,moveJ,curPos-1);
         }
-       */
+       
         // 가장 작은 값
-        i = MIN(Min(room[srcI-1][srcJ],room[srcI][srcJ-1]),MIN(room[srcI+1][srcJ],room[srcI][srcJ+1])) 
+       // i = MIN(Min(room[srcI-1][srcJ],room[srcI][srcJ-1]),MIN(room[srcI+1][srcJ],room[srcI][srcJ+1])); 
     }
 }
 
@@ -241,38 +243,38 @@ void Move(int srcI, int srcJ, int count){
     int i, j;
    
     init(0,0); 
-    resetStack(0);
-    findPathValue(srcI, srcJ);
-    findPathRoute(srcI, srcJ, room[destination[0]][destination[1]]);
-    for(i = 0; i < room[destination[0]][destination[1]]; i++){
-       printf("(x : %d, y : %d)\n", stackPath[i][0], stackPath[i][1]);
+    resetStack(0); 
+for(i = 0; i < room[destination[0]][destination[1]]; i++){
+       printf("(x : %d, y : %d) %d \n", stackPath[i][0], stackPath[i][1], stackPath[i][2]);
 }
 
+    findPathValue(srcI, srcJ);
+    findPathRoute(destination[0], destination[1], room[destination[0]][destination[1]]-1);
+
     setThePath();
-     
-    scanf("%d",&i);
     while(count<room[destination[0]][destination[1]]){
         system("clear");
         printRoom();
         i = stackPath[count][0];
         j = stackPath[count][1];
 
-        printf("\n\n\ncurrent Path : %d %d , Count : %d \n", i, j, count);
+        printf("\n\n\ncurrent Path : %d %d , Count : %d , Global Count : %d\n", i, j, count, countG);
 
-        if(hiddenObstacle[i][j] == OBSTACLE){
-            room[i][j] = OBSTACLE;
-            path[i][j] = OBSTACLE;
+        if(hiddenObstacle[i][j] >= OBSTACLE){
+            room[i][j] = OBSTACLE+600;
+            path[i][j] = OBSTACLE+600;
             path[stackPath[count-1][0]][stackPath[count-1][1]] = -1;
             room[stackPath[count-1][0]][stackPath[count-1][1]] = 1;
-            printf("장애물 ;%d %d", stackPath[count-1][0], stackPath[count-1][1]);
-            scanf("%d",&i);
+            printf("장애물 ;%d %d)  %d, %d", room[i][j], path[i][j], i,j);
+            //scanf("%d",&i);
 
-            Move(stackPath[count-1][0], stackPath[count-1][1], 1);
+            Move(stackPath[count-1][0], stackPath[count-1][1], 0);
         }
         else{
             path[i][j] = -1;
             printPath();
             count++;
+            countG++;
         }
         path[i][j] = 0;
         sleep(1);
